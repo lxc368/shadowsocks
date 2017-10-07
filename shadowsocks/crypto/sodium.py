@@ -179,6 +179,8 @@ class SodiumCrypto(object):
         self.iv_ptr = c_char_p(iv)
         if cipher_name == 'salsa20':
             self.cipher = libsodium.crypto_stream_salsa20_xor_ic
+        elif cipher_name == 'xsalsa20':
+            self.cipher = libsodium.crypto_stream_xsalsa20_xor_ic
         elif cipher_name == 'chacha20':
             self.cipher = libsodium.crypto_stream_chacha20_xor_ic
         elif cipher_name == 'xchacha20':
@@ -317,6 +319,7 @@ class SodiumAeadCrypto(AeadCryptoBase):
 
 ciphers = {
     'salsa20': (32, 8, SodiumCrypto),
+    'xsalsa20': (32, 24, SodiumCrypto),
     'chacha20': (32, 8, SodiumCrypto),
     'xchacha20': (32, 24, SodiumCrypto),
     'chacha20-ietf': (32, 12, SodiumCrypto),
@@ -326,6 +329,21 @@ ciphers = {
     'xchacha20-ietf-poly1305': (32, 32, SodiumAeadCrypto),
     'sodium:aes-256-gcm': (32, 32, SodiumAeadCrypto),
 }
+
+
+def test_salsa20():
+    print("Test salsa20")
+    cipher = SodiumCrypto('salsa20', b'k' * 32, b'i' * 16, 1)
+    decipher = SodiumCrypto('salsa20', b'k' * 32, b'i' * 16, 0)
+
+    util.run_cipher(cipher, decipher)
+
+
+def test_xsalsa20():
+    cipher = SodiumCrypto('xsalsa20', b'k' * 32, b'i' * 24, 1)
+    decipher = SodiumCrypto('xsalsa20', b'k' * 32, b'i' * 24, 0)
+
+    util.run_cipher(cipher, decipher)
 
 
 def test_chacha20():
@@ -340,14 +358,6 @@ def test_xchacha20():
     print("Test xchacha20")
     cipher = SodiumCrypto('xchacha20', b'k' * 32, b'i' * 24, 1)
     decipher = SodiumCrypto('xchacha20', b'k' * 32, b'i' * 24, 0)
-
-    util.run_cipher(cipher, decipher)
-
-
-def test_salsa20():
-    print("Test salsa20")
-    cipher = SodiumCrypto('salsa20', b'k' * 32, b'i' * 16, 1)
-    decipher = SodiumCrypto('salsa20', b'k' * 32, b'i' * 16, 0)
 
     util.run_cipher(cipher, decipher)
 
@@ -430,9 +440,10 @@ def test_aes_256_gcm_chunk():
 
 
 if __name__ == '__main__':
+    test_salsa20()
+    test_xsalsa20()
     test_chacha20()
     test_xchacha20()
-    test_salsa20()
     test_chacha20_ietf()
     test_chacha20_poly1305()
     test_chacha20_poly1305_chunk()
